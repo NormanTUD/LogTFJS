@@ -12,20 +12,21 @@
 				model.add(tf.layers.dense({units: 2, inputShape: [2]}));
 				model.add(tf.layers.dense({units: 2}));
 				model.add(tf.layers.dense({units: 4}));
+				model.add(tf.layers.dropout({rate: 0.1}));
 				model.add(tf.layers.dense({units: 8}));
 
 				for (var i = 0; i < model.layers.length; i++) {
-					eval('model.layers['+i+'].original_apply = model.layers['+i+'].apply;'+
+					eval('model.layers[' + i + '].original_apply = model.layers[' + i + '].apply;' +
 					        'model.layers[' + i +'].apply = function (inputs, kwargs) {' +
-							'console.log("============================= LAYER '+i+'");'+
-							'if(' + i + ' == 0) {'+
-								'console.log("Input layer ' + i + ':");'+
-								'inputs[0].print();'+
-							'}'+
-							'var z = model.layers[' + i + '].original_apply(inputs, kwargs);'+
-							'console.log("Output layer ' + i + ':");'+
-							'z.print();'+
-							'return z;'+
+							'console.log("============> Layer '+ i +' (' + model.layers[i].name + '):");' +
+							'if(' + i + ' == 0) {' +
+								'console.log("Input layer ' + i + ':");' +
+								'inputs[0].print();' +
+							'}' +
+							'var z = model.layers[' + i + '].original_apply(inputs, kwargs);' +
+							'console.log("Output layer ' + i + ':");' +
+							'z.print();' +
+							'return z;' +
 						'}'
 					);
 				}
