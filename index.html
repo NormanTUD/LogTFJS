@@ -1,0 +1,41 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<script src="tf.js"></script>
+	</head>
+	<body>
+		<script>
+			const model = tf.sequential();
+
+			async function run () {
+				// Build and compile model.
+				model.add(tf.layers.dense({units: 2, inputShape: [2]}));
+				model.add(tf.layers.dense({units: 2}));
+
+				for (var i = 0; i < model.layers.length; i++) {
+					eval('model.layers['+i+'].original_apply = model.layers['+i+'].apply;'+
+					        'model.layers[' + i +'].apply = function (inputs, kwargs) {' +
+							'console.log("============================= LAYER '+i+'");'+
+							'console.log("INPUT LAYER '+i+':");'+
+							'inputs[0].print();'+
+							'var z = model.layers['+i+'].original_apply(inputs, kwargs);'+
+							'console.log("OUTPUT LAYER'+i+':");'+
+							'z.print();'+
+							'return z;'+
+						'}'
+					);
+				}
+
+				model.compile({optimizer: 'sgd', loss: 'meanSquaredError'});
+
+				// Generate some synthetic data for training.
+				const xs = tf.tensor2d([1, 2, 3, 4], [2, 2]);
+				const ys = tf.tensor2d([1, 3, 5, 7], [2, 2]);
+
+				// Train model with fit().
+				await model.fit(xs, ys, {epochs: 1});
+			}
+			run();
+		</script>
+	</body>
+</html>
