@@ -5,20 +5,19 @@
 	</head>
 	<body>
 		<script>
-			const model = tf.sequential();
+			var model = tf.sequential();
 
 			async function run () {
 				// Build and compile model.
 				model.add(tf.layers.dense({units: 2, inputShape: [2]}));
 				model.add(tf.layers.dense({units: 2}));
 				model.add(tf.layers.dense({units: 4}));
-				model.add(tf.layers.dropout({rate: 0.1}));
 				model.add(tf.layers.dense({units: 8}));
 
 				for (var i = 0; i < model.layers.length; i++) {
 					eval('model.layers[' + i + '].original_apply = model.layers[' + i + '].apply;' +
 					        'model.layers[' + i +'].apply = function (inputs, kwargs) {' +
-							'console.log("============> Layer '+ i +' (' + model.layers[i].name + '):");' +
+							'console.log("============> Layer '+ i +' (' + model.layers[i].name + ')", model.layers[' + i + '].getConfig());' +
 							'if(' + i + ' == 0) {' +
 								'console.log("Input layer ' + i + ':");' +
 								'inputs[0].print();' +
@@ -34,11 +33,11 @@
 				model.compile({optimizer: 'sgd', loss: 'meanSquaredError'});
 
 				// Generate some synthetic data for training.
-				const xs = tf.tensor2d([1, 2, 3, 4], [2, 2]);
-				const ys = tf.tensor2d([[1, 2, 3, 4, 5, 6, 7, 8], [5, 6, 7, 8, 9, 10, 11, 12]]);
+				const xs = tf.tensor2d([1, 2, 3, 4, 5, 6, 10, 20], [4, 2]);
+				const ys = tf.tensor2d([[1, 2, 3, 4, 5, 6, 7, 8], [5, 6, 7, 8, 9, 10, 11, 12], [5, 6, 7, 8, 9, 10, 12, 13], [9, 8, 7, 6, 5, 4, 3, 2]]);
 
 				// Train model with fit().
-				await model.fit(xs, ys, {epochs: 1});
+				await model.fit(xs, ys, {epochs: 1, batchSize: 10});
 			}
 			run();
 		</script>
